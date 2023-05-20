@@ -1,0 +1,88 @@
+----------------------------------------------------------------------------------
+-- Company: Grupo 7 INC.
+-- Engineers: 
+--Attem Carini, María Antonella - 41321136
+--Bevilacqua, Francisco Norberto - 45029407
+--Cabero, Mauro Ezequiel - 43761887
+--Nuñez, Anna - 44130217
+-- Create Date: 15.05.2023 11:23:28
+-- Design Name: Skynet desing 
+-- Module Name: VHDL - Behavioral
+-- Project Name: Trabajo N°3 FPGA
+-- Target Devices: Basys 3
+-- Tool Versions: Artix-7
+-- Description: 
+-- 
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.std_logic_unsigned.ALL;
+
+
+entity SumadorF is
+    port (
+    BTNL : in std_logic;  --- SWITCH AND
+    BTNR : in std_logic;  --- SWITCH NOR
+    BTNU : in std_logic;  --- SWITCH SUMA
+    BTND : in std_logic;  --- SWITCH RESTA
+    BTNC: in std_logic;  --- SWITCH  COMPARADOR
+    A : in STD_LOGIC_VECTOR (7 downto 0):="0000000";
+    B : in STD_LOGIC_VECTOR (7 downto 0):="0000000";
+    Resultado: out std_logic_vector (7 downto 0);
+    Carry : out std_logic; 
+    Negativo : out std_logic ; 
+    Comp_led : out std_logic 
+    );
+     
+end SumadorF;
+
+architecture Behavioral of SumadorF is
+signal n: STD_LOGIC_VECTOR (7 downto 0);
+signal s: std_logic;
+begin
+
+process (A,B)  -- Podriamos analizarlo cuando cambia el BTNC  también.
+begin  
+if BTNU = '1' then  ---OPERACION SUMA 
+n <=  A+ B; 
+s <= '0'; 
+
+elsif BTND ='1' then---OPERACION RESTA 
+if A> B then  ---Situacion de resultado positivo 
+n<= A-B;
+s <= '0' ; 
+n(7) <= '0' ; 
+elsif A = B then ---Situacion de resultado nulo
+n <= "00000000";
+s <= '0';
+
+elsif A < B then ---TENEMOS UN RESULTADO NEGATIVO
+	n <= B - A;    
+	s <= '1';
+    n(7) <= '0';
+end if;
+
+elsif BTNL = '1' then ---AND
+	n <= A and B;
+	s <= '0';
+	n(7) <= '0';
+elsif BTNR ='1'then ---OR
+	n <= A or B;
+	s <= '0';
+	n(7) <= '0';
+	
+elsif BTNC = '1' then  --- COMPARADOR (SI SON IGUALES)
+    if ( A = B ) then
+   Comp_led <= '1';
+      else
+         Comp_led <= '0';
+      end if;
+end if;
+
+end process;
+---OUTPUTS
+Resultado <= n (7 downto 0);
+Carry <= n(7);
+Negativo <= s;
+end Behavioral;
+
